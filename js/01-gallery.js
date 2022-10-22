@@ -1,33 +1,56 @@
 import { galleryItems } from "./gallery-items.js";
+
 // Change code below this line
 
-const galleryEL = document.querySelector(".gallery");
+// console.log(galleryItems);
 
-const createGallery = (galleryItems) =>
-  galleryItems.map((item) => {
-    const galleryItemsEl = `<div class="gallery__item">
-  <a class="gallery__link" href="${item.original}">
-    <img
-      class="gallery__image"
-      src="${item.preview}"
-      data-source="${item.original}"
-      alt="${item.description}"
-    />
-  </a>
-</div>`;
-    galleryEL.insertAdjacentHTML("beforeend", galleryItemsEl);
-  });
+const gallery = document.querySelector(".gallery");
 
-createGallery(galleryItems);
+gallery.addEventListener("click", onShowFullImg);
 
-const onClick = (evt) => {
-  evt.preventDefault();
-  const target = evt.target.dataset.source;
-  const instance = basicLightbox.create(`
-      <img src="${target}">
-  `);
+gallery.insertAdjacentHTML("beforeend", createGalarryMarkup(galleryItems));
 
-  instance.show();
-};
+function createGalarryMarkup(pictures) {
+  const markup = pictures
+    .map(({ preview, original, description }) => {
+      return `<div class="gallery__item">
+        <a class="gallery__link" href="large-image.jpg">
+            <img
+            class="gallery__image"
+            src="${preview}"
+            data-source="${original}"
+            alt="${description}"
+            />
+        </a>
+    </div>`;
+    })
+    .join("");
+  return markup;
+}
 
-galleryEL.addEventListener("click", onClick);
+const showFullPic = basicLightbox.create(`<img src="">`, {
+    onShow: instance => {
+        window.addEventListener("keydown", onCloseImg);
+    },
+    onClose: instance => {
+        window.removeEventListener("keydown", onCloseImg);
+    }
+})
+
+console.log(basicLightbox.create(`<img src="">`));
+
+function onShowFullImg(e) {
+  e.preventDefault();
+  if (e.target.nodeName !== "IMG") {
+    return;
+  }
+    showFullPic.element().querySelector("img").src = e.target.dataset.source;
+    showFullPic.show()
+}
+
+function onCloseImg(e) {
+  if (e.code === "Escape") {
+      showFullPic.close()
+      return
+  }
+}
